@@ -5,22 +5,24 @@ UV := $(VENV)/bin/uv
 PRE_COMMIT := $(VENV)/bin/pre-commit
 PYTEST := $(VENV)/bin/pytest
 RUFF := $(VENV)/bin/ruff
+MYPY := $(VENV)/bin/mypy
 
-.PHONY: install install-quiet test lint format build build-plain run clean
+.PHONY: install install install-dev install-emacs test lint format docker-build docker-run clean
 
 $(VENV)/bin/uv:
 	python -m venv $(VENV)
 	$(PYTHON) -m pip install --quiet uv
 
 install: $(VENV)/bin/uv
-	$(UV) pip install --editable .
-	$(UV) pip install pre-commit
-	$(PRE_COMMIT) install
-
-install-quiet: $(VENV)/bin/uv
 	$(UV) pip install --quiet --editable .
 	$(UV) pip install --quiet pre-commit
 	$(PRE_COMMIT) install
+
+install-dev: install
+	$(UV) pip install --quiet --editable ".[dev]"
+
+install-emacs: install-dev
+	$(UV) pip install --quiet --editable ".[emacs]"
 
 test: $(VENV)/bin/pytest
 	$(PYTEST) tests/ -v --cov=app --cov-report=term-missing --cov-report=html
@@ -29,16 +31,20 @@ format: $(VENV)/bin/ruff
 	$(RUFF) format .
 
 lint: $(VENV)/bin/ruff
-	$(RUFF) check .
-	$(RUFF) format --check .
+	$(RUFF) check --output-format=pylint .
+	$(RUFF) format --check --diff .
+	$(MYPY) src
 
-build:
-	docker build -t $(APP_NAME) .
+pre-commit: $(VENV)/bin/pre-commit
+	$(PRE_COMMIT) run --all-files
 
-build-plain:
+pre-commit-upgrade: $(VENV)/bin/pre-commit
+	$(PRE_COMMIT) autoupdate
+
+docker-build:
 	docker build --progress=plain -t $(APP_NAME) .
 
-run:
+docker-run:
 	docker run $(APP_NAME)
 
 clean:

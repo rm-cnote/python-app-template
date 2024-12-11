@@ -28,6 +28,15 @@ htmlcov/
 .pytest_cache/
 .ruff_cache/
 
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# LSP
+.log/
+*lsp.log
+
 # Vi/Vim
 [._]*.s[a-v][a-z]
 [._]*.sw[a-p]
@@ -61,3 +70,6 @@ flycheck_*.el
 /server/
 .projectile
 .dir-locals.el
+
+# Docker
+.docker/
