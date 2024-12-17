@@ -28,6 +28,7 @@ test: $(VENV)/bin/pytest
 	$(PYTEST) tests/ -v --cov=app --cov-report=term-missing --cov-report=html
 
 format: $(VENV)/bin/ruff
+	$(RUFF) check --select I --fix
 	$(RUFF) format .
 
 lint: $(VENV)/bin/ruff
